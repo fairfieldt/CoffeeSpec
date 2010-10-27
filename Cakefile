@@ -41,22 +41,22 @@ run = (args) ->
   proc.on        'exit', (status) -> process.exit(1) if status != 0
 
 output = ''
-runTest = (args) ->
+runBuild = (args) ->
   proc =         spawn 'coffee', args
   proc.stderr.on 'data', (buffer) -> puts buffer.toString()
-  proc.stdout.on 'data', (buffer) -> CoffeeScript.run(buffer.toString(), {'test'})
+  proc.stdout.on 'data', (buffer) ->fs.writeFileSync('./CoffeeUnit.coffee', buffer.toString())
   proc.on        'exit', (status) -> process.exit(1) if status != 0
   
   return output
 
 
 task 'test', 'run the xc test suite', (options) ->
-	args = ['./tools/coffeescript-concat.coffee','-I', './src', '-I', './src/compat']
-	args.push('./tests/' + fileName) for fileName in fs.readdirSync('./tests')
-	runTest(args)
-	console.log(output)
+	invoke('build')
 
 task 'build', 'build CoffeeTest', (options) ->
+	args = ['./tools/coffeescript-concat.coffee']
+	args.push('./src/' + fileName) for fileName in fs.readdirSync('./src')
+	runBuild(args)
 	
 
 
