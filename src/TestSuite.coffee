@@ -11,4 +11,6 @@ class TestSuite
 		
 	runTests: ->
 		for test in @tests
+			test.setup()
 			test.run()
+			test.teardown()

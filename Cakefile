@@ -34,10 +34,10 @@ require('underscore')
 {spawn, exec} = require 'child_process'
 
 
-run = (args) ->
+runTest = (args) ->
   proc =         spawn 'coffee', args
   proc.stderr.on 'data', (buffer) -> puts buffer.toString()
-  proc.stdout.on 'data', (buffer) -> puts buffer.toString()
+  proc.stdout.on 'data', (buffer) -> CoffeeScript.run(buffer.toString(), {'test'})
   proc.on        'exit', (status) -> process.exit(1) if status != 0
 
 output = ''
@@ -52,6 +52,8 @@ runBuild = (args) ->
 
 task 'test', 'run the xc test suite', (options) ->
 	invoke('build')
+	args = ['./tools/coffeescript-concat.coffee', './CoffeeUnit.coffee', './TestTest.coffee']
+	runTest(args)
 
 task 'build', 'build CoffeeTest', (options) ->
 	args = ['./tools/coffeescript-concat.coffee']

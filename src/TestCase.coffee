@@ -1,21 +1,23 @@
 class TestCase
-	constructor: (@testName) ->
-		
+	constructor: (@name) ->
+		@name ?= 'runTest'
+		unless this.hasMethod(@name)
+			console.error('Error: No test named ' + @name)
 	setup: ->
 		
 	teardown: ->
-		
+
 	run: ->
-		this[@testName]()
-		
+		if this[@name]? 
+			this[@name]()
 
-class t2 extends TestCase
-	constructor:  ->
-		super('testTest')
+	hasMethod: (testName) ->
+		testName in this.getMethods()
+	
+	getTests: (testPrefix)->
+		r = new RegExp()
+		r.compile( testPrefix + '.*')
+		return method for all method in this.getMethods() when r.test(method)
 		
-	testTest: ->
-		console.log('testtest')
-		
-
-t = new t2()
-t.run()
+	getMethods: ->
+		name for all name, object of this when typeof(object) is 'function'
