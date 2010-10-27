@@ -56,8 +56,8 @@ task 'test', 'run the xc test suite', (options) ->
 	runTest(args)
 	console.log(output)
 
-
-
+task 'build', 'build CoffeeTest', (options) ->
+	
 
 
 
