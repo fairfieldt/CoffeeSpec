@@ -52,10 +52,10 @@ runBuild = (args) ->
 
 task 'test', 'run the xc test suite', (options) ->
 	invoke('build')
-	args = ['./tools/coffeescript-concat.coffee', './CoffeeUnit.coffee', './TestTest.coffee']
+	args = ['./tools/coffeescript-concat.coffee', './CoffeeSpec.coffee', './TestTest.coffee']
 	runTest(args)
 
-task 'build', 'build CoffeeTest', (options) ->
+task 'build', 'build CoffeeSpec', (options) ->
 	args = ['./tools/coffeescript-concat.coffee']
 	args.push('./src/' + fileName) for fileName in fs.readdirSync('./src')
 	runBuild(args)
