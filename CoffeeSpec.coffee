@@ -1,5 +1,4 @@
-
-root = exports ? this
+errors = []
 
 describe = (testName, tests...) ->
 	console.log('Testing ' + testName)
@@ -22,12 +21,20 @@ describe = (testName, tests...) ->
 			foundTeardown = true
 		if foundSetup and foundTeardown
 			break
-	
-	for test in tests	
-		for all i,j of test
-			console.log(i + ' ' + j)
-		console.log(test.name)
-		test.run(setup, teardown)
+	testCount = tests.length
+	failCount = 0
+	for test in tests
+		message = '\t' + test.name
+		if not test.run(setup, teardown)
+			message += ' Fail: ' + ++failCount
+		console.log(message)
+	if failCount > 0
+		console.log('\n')
+		i = 1
+		for error in errors
+			console.log(i++ + ': ' + error)
+			
+	console.log('\n' + testCount + ' tests, ' + failCount + ' failures')
 
 
 it = (name, test) ->
@@ -35,24 +42,53 @@ it = (name, test) ->
 		this.setup = setup
 		this.setup()
 		this.test = test
-		this.test()
+		try
+			result = this.test()
+		catch e
+			result = false
+			errors.push(e.name +  ' in ' + name + ': ' + e.message)
 		this.teardown = teardown
-		this.teardown()}
+		this.teardown()
+		result}
 	
-expect = (test) ->console.log(test)
+expect = (value) -> new Expect(value)
 
 beforeEach = (setup) -> {name:'setup', run:setup}
 
-describe 'Node',
-
-	beforeEach ->
-		this.node = {x:2}
-		
-	it "should have x == 0", ->
-		expect @node.x == 2
-		expect @node.x == 12
+class Expect
+	constructor: (@value) -> 
 	
-toEqual = (a, b) -> a.toEqual(b)
-expect = (x) -> {toEqual: (y) -> x == y}
+	toEqual: (expectedValue) ->
+		if @value == expectedValue
+			return true
+		else
+			throw {name: 'toEqualError', message:'Expected ' + expectedValue + ', got ' + @value}
+			return false
 
-console.log( expect(3).toEqual 3)
+	notToEqual: (expectedValue) -> 
+		if @value != expectedValue
+			return true
+		else
+			throw {name: 'notToEqualError', message:expectedValue + ' equals ' + @value}
+			return false
+			
+	toHaveLength: (expectedLength) ->
+		unless @value.length?
+		 	throw {name: 'NoLengthPropertyError', message:'Object has no length property'}
+		else if @value.length == expectedLength
+			return true
+		else
+			throw {name: 'toHaveLengthError', message:'Expected length of ' + expectedLength + ', got ' + @value.length}
+			
+	toThrowException: (exceptionName) ->
+		unless typeof @value is 'function'
+			throw {name: 'NotAFunctionError', message:'object is not a function; cannot throw an exception'}
+		else
+			try
+				@value()
+			catch e
+				if e.name == exceptionName
+					return true
+				else
+					throw e
+			throw {name: 'toThrowExceptionError', message:'function did not throw ' + exceptionName}
